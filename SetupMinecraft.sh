@@ -105,28 +105,28 @@ if [ -d "$ServerName" ]; then
   echo "Server directory is: $DirName/minecraftbe/$ServerName"
 
   # Remove existing scripts
-  rm start.sh stop.sh restart.sh
+  sudo rm start.sh stop.sh restart.sh
 
   # Download start.sh from repository
   echo "Grabbing start.sh from repository..."
-  wget -O start.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/start.sh
-  chmod +x start.sh
-  sed -i "s:dirname:$DirName:g" start.sh
-  sed -i "s:servername:$ServerName:g" start.sh
+  sudo wget -O start.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/start.sh
+  sudo sudo chmod +x start.sh
+  sudo sed -i "s:dirname:$DirName:g" start.sh
+  sudo sed -i "s:servername:$ServerName:g" start.sh
 
   # Download stop.sh from repository
   echo "Grabbing stop.sh from repository..."
-  wget -O stop.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/stop.sh
-  chmod +x stop.sh
-  sed -i "s:dirname:$DirName:g" stop.sh
-  sed -i "s:servername:$ServerName:g" stop.sh
+  sudo wget -O stop.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/stop.sh
+  sudo chmod +x stop.sh
+  sudo sed -i "s:dirname:$DirName:g" stop.sh
+  sudo sed -i "s:servername:$ServerName:g" stop.sh
 
   # Download restart.sh from repository
   echo "Grabbing restart.sh from repository..."
-  wget -O restart.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/restart.sh
-  chmod +x restart.sh
-  sed -i "s:dirname:$DirName:g" restart.sh
-  sed -i "s:servername:$ServerName:g" restart.sh
+  sudo wget -O restart.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/restart.sh
+  sudo chmod +x restart.sh
+  sudo sed -i "s:dirname:$DirName:g" restart.sh
+  sudo sed -i "s:servername:$ServerName:g" restart.sh
 
   # Update minecraft server service
   echo "Configuring $ServerName service..."
@@ -135,8 +135,8 @@ if [ -d "$ServerName" ]; then
   sudo sed -i "s/replace/$UserName/g" /etc/systemd/system/$ServerName.service
   sudo sed -i "s:dirname:$DirName:g" /etc/systemd/system/$ServerName.service
   sudo sed -i "s:servername:$ServerName:g" /etc/systemd/system/$ServerName.service
-  sed -i "/server-port=/c\server-port=$PortIPV4" server.properties
-  sed -i "/server-portv6=/c\server-portv6=$PortIPV6" server.properties
+  sudo sed -i "/server-port=/c\server-port=$PortIPV4" server.properties
+  sudo sed -i "/server-portv6=/c\server-portv6=$PortIPV6" server.properties
   sudo systemctl daemon-reload
   echo -n "Start Minecraft server at startup automatically (y/n)?"
   read answer < /dev/tty
@@ -172,10 +172,10 @@ fi
 echo "Creating minecraft server directory ($DirName/minecraftbe/$ServerName)..."
 cd $DirName
 cd minecraftbe
-mkdir $ServerName
+sudo mkdir $ServerName
 cd $ServerName
-mkdir downloads
-mkdir backups
+sudo mkdir downloads
+sudo mkdir backups
 
 # Check CPU archtecture to see if we need to do anything special for the platform the server is running on
 echo "Getting system CPU architecture..."
@@ -220,7 +220,7 @@ fi
 
 # Retrieve latest version of Minecraft Bedrock dedicated server
 echo "Checking for the latest version of Minecraft Bedrock server..."
-wget -O downloads/version.html https://minecraft.net/en-us/download/server/bedrock/
+sudo wget -O downloads/version.html https://minecraft.net/en-us/download/server/bedrock/
 DownloadURL=$(grep -o 'https://minecraft.azureedge.net/bin-linux/[^"]*' downloads/version.html)
 DownloadFile=$(echo "$DownloadURL" | sed 's#.*/##')
 echo "$DownloadURL"
@@ -229,29 +229,29 @@ echo "$DownloadFile"
 # Download latest version of Minecraft Bedrock dedicated server
 echo "Downloading the latest version of Minecraft Bedrock server..."
 
-wget -O "downloads/$DownloadFile" "$DownloadURL"
-unzip -o "downloads/$DownloadFile"
+sudo wget -O "downloads/$DownloadFile" "$DownloadURL"
+sudo unzip -o "downloads/$DownloadFile"
 
 # Download start.sh from repository
 echo "Grabbing start.sh from repository..."
-wget -O start.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/start.sh
-chmod +x start.sh
-sed -i "s:dirname:$DirName:g" start.sh
-sed -i "s:servername:$ServerName:g" start.sh
+sudo wget -O start.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/start.sh
+sudo chmod +x start.sh
+sudo sed -i "s:dirname:$DirName:g" start.sh
+sudo sed -i "s:servername:$ServerName:g" start.sh
 
 # Download stop.sh from repository
 echo "Grabbing stop.sh from repository..."
-wget -O stop.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/stop.sh
-chmod +x stop.sh
-sed -i "s:dirname:$DirName:g" stop.sh
-sed -i "s:servername:$ServerName:g" stop.sh
+sudo wget -O stop.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/stop.sh
+sudo chmod +x stop.sh
+sudo sed -i "s:dirname:$DirName:g" stop.sh
+sudo sed -i "s:servername:$ServerName:g" stop.sh
 
 # Download restart.sh from repository
 echo "Grabbing restart.sh from repository..."
-wget -O restart.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/restart.sh
-chmod +x restart.sh
-sed -i "s:dirname:$DirName:g" restart.sh
-sed -i "s:servername:$ServerName:g" restart.sh
+sudo wget -O restart.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/restart.sh
+sudo chmod +x restart.sh
+sudo sed -i "s:dirname:$DirName:g" restart.sh
+sudo sed -i "s:servername:$ServerName:g" restart.sh
 
 # Service configuration
 echo "Configuring Minecraft $ServerName service..."
@@ -260,8 +260,8 @@ sudo chmod +x /etc/systemd/system/$ServerName.service
 sudo sed -i "s/replace/$UserName/g" /etc/systemd/system/$ServerName.service
 sudo sed -i "s:dirname:$DirName:g" /etc/systemd/system/$ServerName.service
 sudo sed -i "s:servername:$ServerName:g" /etc/systemd/system/$ServerName.service
-sed -i "/server-port=/c\server-port=$PortIPV4" server.properties
-sed -i "/server-portv6=/c\server-portv6=$PortIPV6" server.properties
+sudo sed -i "/server-port=/c\server-port=$PortIPV4" server.properties
+sudo sed -i "/server-portv6=/c\server-portv6=$PortIPV6" server.properties
 sudo systemctl daemon-reload
 
 echo -n "Start Minecraft server at startup automatically (y/n)?"
