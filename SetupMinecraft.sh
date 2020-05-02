@@ -53,14 +53,18 @@ read_with_prompt UserName "Enter username for Minecraft Server"
 
 DirName=/home/$UserName
 
-# Check to see if Minecraft server main directory already exists
-if [ ! id $UserName >/dev/null 2>&1 ]; then
+# Check to see if the minecraft user exists
+if [ id $UserName >/dev/null 2>&1 ]; then
+  echo "$UserName exits"
+else
+  echo "Adding $UserName with home $DirName"
   sudo adduser --system --home $DirName $UserName
   sudo addgroup -f --system $UserName
   sudo usermod -g $UserName $UserName
   sudo chown -R $UserName.$UserName $DirName
 fi
 
+# Check to see if Minecraft server main directory already exists
 if [ ! -d $DirName ]; then
   mkdir $DirName
 fi
