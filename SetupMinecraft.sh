@@ -58,30 +58,27 @@ if [ id $UserName >/dev/null 2>&1 ]; then
   echo "$UserName exits"
 else
   echo "Adding $UserName with home $DirName"
-  sudo adduser --system --home $DirName $UserName
-  sudo addgroup -f --system $UserName
-  sudo usermod -g $UserName $UserName
-  sudo chown -R $UserName.$UserName $DirName
+  sudo adduser --system -group $UserName
 fi
 
 # Check to see if Minecraft server main directory already exists
 if [ ! -d $DirName ]; then
-  mkdir $DirName
+  sudo mkdir $DirName
 fi
 
 cd $DirName
 
 if [ ! -d "minecraftbe" ]; then
-  mkdir minecraftbe
+  sudo mkdir minecraftbe
   cd minecraftbe
 else
   cd minecraftbe
   if [ -f "bedrock_server" ]; then
     echo "Migrating old Bedrock server to minecraftbe/old"
     cd $DirName
-    mv minecraftbe old
-    mkdir minecraftbe
-    mv old minecraftbe/old
+    sudo mv minecraftbe old
+    sudo mkdir minecraftbe
+    sudo mv old minecraftbe/old
     cd minecraftbe
     echo "Migration complete to minecraftbe/old"
   fi
