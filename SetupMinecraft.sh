@@ -43,14 +43,30 @@ echo "Installing screen, unzip, sudo, net-tools, wget.."
 if [ ! -n "`which sudo`" ]; then
   apt-get update && apt-get install sudo -y
 fi
-sudo apt-get update
-sudo apt-get install screen unzip wget -y
-sudo apt-get install net-tools -y
-sudo apt-get install libcurl4 -y
-sudo apt-get install openssl -y
+sudo apt update
+sudo apt install screen unzip wget -y
+sudo apt install net-tools -y
+sudo apt install libcurl4 -y
+sudo apt install openssl -y
+
+read_with_prompt UserName "Enter username for Minecraft Server"
+
+DirName=/home/$UserName
 
 # Check to see if Minecraft server main directory already exists
-cd ~
+if [ ! id $UserName >/dev/null 2>&1 ]; then
+  sudo adduser --system --home $DirName $UserName
+  sudo addgroup -f --system $UserName
+  sudo usermod -g $UserName $UserName
+  sudo chown -R $UserName.$UserName $DirName
+fi
+
+if [ ! -d $DirName ]; then
+  mkdir $DirName
+fi
+
+cd $DirName
+
 if [ ! -d "minecraftbe" ]; then
   mkdir minecraftbe
   cd minecraftbe
@@ -58,7 +74,7 @@ else
   cd minecraftbe
   if [ -f "bedrock_server" ]; then
     echo "Migrating old Bedrock server to minecraftbe/old"
-    cd ~
+    cd $DirName
     mv minecraftbe old
     mkdir minecraftbe
     mv old minecraftbe/old
@@ -82,10 +98,7 @@ read_with_prompt PortIPV6 "Server IPV6 Port" 19133
 if [ -d "$ServerName" ]; then
   echo "Directory minecraftbe/$ServerName already exists!  Updating scripts and configuring service ..."
 
-  # Get Home directory path and username
-  DirName=$(readlink -e ~)
-  UserName=$(whoami)
-  cd ~
+  cd $DirName
   cd minecraftbe
   cd $ServerName
   echo "Server directory is: $DirName/minecraftbe/$ServerName"
@@ -95,28 +108,28 @@ if [ -d "$ServerName" ]; then
 
   # Download start.sh from repository
   echo "Grabbing start.sh from repository..."
-  wget -O start.sh https://raw.githubusercontent.com/TheRemote/MinecraftBedrockServer/master/start.sh
+  wget -O start.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/start.sh
   chmod +x start.sh
   sed -i "s:dirname:$DirName:g" start.sh
   sed -i "s:servername:$ServerName:g" start.sh
 
   # Download stop.sh from repository
   echo "Grabbing stop.sh from repository..."
-  wget -O stop.sh https://raw.githubusercontent.com/TheRemote/MinecraftBedrockServer/master/stop.sh
+  wget -O stop.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/stop.sh
   chmod +x stop.sh
   sed -i "s:dirname:$DirName:g" stop.sh
   sed -i "s:servername:$ServerName:g" stop.sh
 
   # Download restart.sh from repository
   echo "Grabbing restart.sh from repository..."
-  wget -O restart.sh https://raw.githubusercontent.com/TheRemote/MinecraftBedrockServer/master/restart.sh
+  wget -O restart.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/restart.sh
   chmod +x restart.sh
   sed -i "s:dirname:$DirName:g" restart.sh
   sed -i "s:servername:$ServerName:g" restart.sh
 
   # Update minecraft server service
   echo "Configuring $ServerName service..."
-  sudo wget -O /etc/systemd/system/$ServerName.service https://raw.githubusercontent.com/TheRemote/MinecraftBedrockServer/master/minecraftbe.service
+  sudo wget -O /etc/systemd/system/$ServerName.service https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/minecraftbe.service
   sudo chmod +x /etc/systemd/system/$ServerName.service
   sudo sed -i "s/replace/$UserName/g" /etc/systemd/system/$ServerName.service
   sudo sed -i "s:dirname:$DirName:g" /etc/systemd/system/$ServerName.service
@@ -140,6 +153,8 @@ if [ -d "$ServerName" ]; then
     fi
   fi
 
+  sudo chown -R $UserName.$UserName $DirName
+
   # Setup completed
   echo "Setup is complete.  Starting Minecraft $ServerName server..."
   sudo systemctl start $ServerName.service
@@ -153,8 +168,8 @@ if [ -d "$ServerName" ]; then
 fi
 
 # Create server directory
-echo "Creating minecraft server directory (~/minecraftbe/$ServerName)..."
-cd ~
+echo "Creating minecraft server directory ($DirName/minecraftbe/$ServerName)..."
+cd $DirName
 cd minecraftbe
 mkdir $ServerName
 cd $ServerName
@@ -193,13 +208,13 @@ if [[ "$CPUArch" == *"aarch"* || "$CPUArch" == *"arm"* ]]; then
     echo "QEMU-x86_64-static did not install successfully -- please check the above output to see what went wrong."
     exit 1
   fi
-  
+
   # Retrieve depends.zip from GitHub repository
-  wget -O depends.zip https://raw.githubusercontent.com/TheRemote/MinecraftBedrockServer/master/depends.zip
+  wget -O depends.zip https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/depends.zip
   unzip depends.zip
   sudo mkdir /lib64
   # Create soft link ld-linux-x86-64.so.2 mapped to ld-2.28.so
-  sudo ln -s ~/minecraftbe/$ServerName/ld-2.28.so /lib64/ld-linux-x86-64.so.2
+  sudo ln -s $DirName/minecraftbe/$ServerName/ld-2.28.so /lib64/ld-linux-x86-64.so.2
 fi
 
 # Retrieve latest version of Minecraft Bedrock dedicated server
@@ -212,35 +227,34 @@ echo "$DownloadFile"
 
 # Download latest version of Minecraft Bedrock dedicated server
 echo "Downloading the latest version of Minecraft Bedrock server..."
-UserName=$(whoami)
-DirName=$(readlink -e ~)
+
 wget -O "downloads/$DownloadFile" "$DownloadURL"
 unzip -o "downloads/$DownloadFile"
 
 # Download start.sh from repository
 echo "Grabbing start.sh from repository..."
-wget -O start.sh https://raw.githubusercontent.com/TheRemote/MinecraftBedrockServer/master/start.sh
+wget -O start.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/start.sh
 chmod +x start.sh
 sed -i "s:dirname:$DirName:g" start.sh
 sed -i "s:servername:$ServerName:g" start.sh
 
 # Download stop.sh from repository
 echo "Grabbing stop.sh from repository..."
-wget -O stop.sh https://raw.githubusercontent.com/TheRemote/MinecraftBedrockServer/master/stop.sh
+wget -O stop.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/stop.sh
 chmod +x stop.sh
 sed -i "s:dirname:$DirName:g" stop.sh
 sed -i "s:servername:$ServerName:g" stop.sh
 
 # Download restart.sh from repository
 echo "Grabbing restart.sh from repository..."
-wget -O restart.sh https://raw.githubusercontent.com/TheRemote/MinecraftBedrockServer/master/restart.sh
+wget -O restart.sh https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/restart.sh
 chmod +x restart.sh
 sed -i "s:dirname:$DirName:g" restart.sh
 sed -i "s:servername:$ServerName:g" restart.sh
 
 # Service configuration
 echo "Configuring Minecraft $ServerName service..."
-sudo wget -O /etc/systemd/system/$ServerName.service https://raw.githubusercontent.com/TheRemote/MinecraftBedrockServer/master/minecraftbe.service
+sudo wget -O /etc/systemd/system/$ServerName.service https://raw.githubusercontent.com/markfknight/MinecraftBedrockServer/master/minecraftbe.service
 sudo chmod +x /etc/systemd/system/$ServerName.service
 sudo sed -i "s/replace/$UserName/g" /etc/systemd/system/$ServerName.service
 sudo sed -i "s:dirname:$DirName:g" /etc/systemd/system/$ServerName.service
@@ -268,6 +282,8 @@ if [ "$answer" != "${answer#[Yy]}" ]; then
     echo "Daily restart scheduled.  To change time or remove automatic restart type crontab -e"
   fi
 fi
+
+sudo chown -R $UserName.$UserName $DirName
 
 # Finished!
 echo "Setup is complete.  Starting Minecraft server..."
